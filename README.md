@@ -4,5 +4,5 @@ Convert curves to Texture
 
 
 在菜单"MyaTools/CurveToTexture Window"打开窗口
-![](Docs\Images\CurveToTextureWindow.png)
+![](Docs/Images/CurveToTextureWindow.png)
 
