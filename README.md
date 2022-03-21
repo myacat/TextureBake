@@ -2,9 +2,22 @@
 
 Unity版本：2018.4.16c1
 
+
 --- 
 
+### 2022-03-22 更新
+1、添加渐变色类型
+
+2、修改preview UI
+
+![textureFormatSet](Docs/Images/GradientToTexture.gif)
+
+---
+
 ### 2022-03-21 更新
+
+
+
 
 1、添加了贴图保存格式的设置，可以保存为以下四种格式的贴图：
 

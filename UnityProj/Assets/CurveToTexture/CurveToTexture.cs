@@ -49,18 +49,13 @@ public class CurveToTexture : EditorWindow, IHasCustomMenu
         Rect lastTect = GUILayoutUtility.GetLastRect();
         Rect previewRect = position;
         previewRect.height -= lastTect.height;
-        cttEditor.DrawPreview(previewRect);
-
+        cttEditor.DrawCustomPreview(previewRect);
     }
 
 
     public void AddItemsToMenu(GenericMenu menu)
     {
         menu.AddItem(m_SaveSettings, false, MenuItemm_SaveSettings);
-
-        //NOTE: do not show the menu after adding items,
-        //      Unity will do that after adding the default
-        //      items: maximize, close tab, add tab >
     }
     private GUIContent m_SaveSettings = new GUIContent("Save Settings");
     private void MenuItemm_SaveSettings()

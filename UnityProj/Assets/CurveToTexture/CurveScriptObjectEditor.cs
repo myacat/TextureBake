@@ -11,7 +11,7 @@ public class CurveScriptObjectEditor : Editor
     CurveScriptObject cso;
 
     Texture2D cureveTex;
-    public bool AutoRefresh = false;
+
     public void OnEnable()
     {
         cso = (CurveScriptObject)target;
@@ -52,7 +52,7 @@ public class CurveScriptObjectEditor : Editor
         }
         if (EditorGUI.EndChangeCheck())
         {
-            if (AutoRefresh)
+            if (cso.AutoRefresh)
             {
                 RefreshCureveTex();
             }
@@ -63,9 +63,9 @@ public class CurveScriptObjectEditor : Editor
         EditorGUILayout.BeginHorizontal();
         {
             GUILayout.FlexibleSpace();
-            AutoRefresh = GUILayout.Toggle(AutoRefresh, "AutoRefresh",GUILayout.MaxWidth(80f));
+            cso.AutoRefresh = GUILayout.Toggle(cso.AutoRefresh, "AutoRefresh",GUILayout.MaxWidth(80f));
 
-            if (GUILayout.Button("Refresh", GUILayout.MaxWidth(80f)) && !AutoRefresh)
+            if (GUILayout.Button("Refresh", GUILayout.MaxWidth(80f)) && !cso.AutoRefresh)
             {
                 RefreshCureveTex();
             }
@@ -76,7 +76,7 @@ public class CurveScriptObjectEditor : Editor
         }
         EditorGUILayout.EndHorizontal();
     }
-    public void DrawPreview(Rect r)
+    public void DrawCustomPreview(Rect r)
     {
         EditorGUILayout.BeginHorizontal("preToolbar");
         GUILayout.Label("preview:", "preToolbar2");
