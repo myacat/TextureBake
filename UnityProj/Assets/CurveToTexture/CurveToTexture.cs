@@ -12,6 +12,7 @@ public class CurveToTexture : EditorWindow, IHasCustomMenu
     {
         // Get existing open window or if none, make a new one:
         CurveToTexture window = (CurveToTexture)EditorWindow.GetWindow(typeof(CurveToTexture));
+        window.minSize = new Vector2(300,400);
         window.Show();
     }
 
@@ -43,8 +44,16 @@ public class CurveToTexture : EditorWindow, IHasCustomMenu
                 cttEditor.OnEnable();
             }
         }
+
         cttEditor.OnInspectorGUI();
+        Rect lastTect = GUILayoutUtility.GetLastRect();
+        Rect previewRect = position;
+        previewRect.height -= lastTect.height;
+        cttEditor.DrawPreview(previewRect);
+
     }
+
+
     public void AddItemsToMenu(GenericMenu menu)
     {
         menu.AddItem(m_SaveSettings, false, MenuItemm_SaveSettings);
