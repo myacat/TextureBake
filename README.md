@@ -8,15 +8,15 @@ Unity版本：2018.4.16c1
 
 1、添加了贴图保存格式的设置，可以保存为以下四种格式的贴图：
 
-![](Docs\Images\textureFormatSet.png)
+![textureFormatSet](Docs\Images\textureFormatSet.png)
 
 2、添加了保存配置的功能，可以把设置好的参数保存为asset文件（ScriptableObject）
 
-![](Docs\Images\saveSettings.png)
+![saveSettings](Docs\Images\saveSettings.png)
 
 选中保存好的文件可以直接在Inspector面板上使用，用法和原来的窗口是一样的
 
-![](Docs\Images\asset.png)
+![asset](Docs\Images\asset.png)
 ---
 
 Convert curves to Texture
@@ -26,5 +26,5 @@ Convert curves to Texture
 
 ### **在菜单"MyaTools/CurveToTexture Window"打开窗口**
 
-![](Docs/Images/CurveToTextureWindow.png)
+![CurveToTextureWindow](Docs/Images/CurveToTextureWindow.png)
 
