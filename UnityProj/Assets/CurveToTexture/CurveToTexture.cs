@@ -3,153 +3,70 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using UnityEditorInternal;
 
-public class CurveToTexture : EditorWindow
+public class CurveToTexture : EditorWindow, IHasCustomMenu
 {
     [MenuItem("MyaTools/CurveToTexture Window")]
     static void Init()
     {
         // Get existing open window or if none, make a new one:
         CurveToTexture window = (CurveToTexture)EditorWindow.GetWindow(typeof(CurveToTexture));
-        window.RefreshCureveTex();
         window.Show();
     }
-    public bool square = true;
-    public SIZE _sizeH = SIZE.x128;
-    public SIZE _sizeV = SIZE.x128;
-    public enum SIZE
+
+    CurveScriptObject m_cso;
+    CurveScriptObject cso
     {
-        x1 = 1,
-        x64 = 64,
-        x128 = 128,
-        x256 = 256,
-        x512 = 512,
+        get
+        {
+            if(m_cso == null)
+            {
+                m_cso = CreateInstance<CurveScriptObject>();
+            }
+            return m_cso;
+        }
+        set
+        {
+            m_cso = value;
+        }
     }
 
-    public enum CureveTextureFormat
-    {
-        PNG,
-        TGA,
-        JPG,
-        EXR
-    }
-    CureveTextureFormat cureveTexFM = CureveTextureFormat.PNG;
-
-    AnimationCurve ac = AnimationCurve.Linear(0, 0, 1, 1);
-
-    Texture2D cureveTex;
-    public bool AutoRefresh = false;
-
+    CurveScriptObjectEditor cttEditor;
     void OnGUI()
     {
-        GUILayout.Label("Base Settings", EditorStyles.boldLabel);
-
-        EditorGUI.BeginChangeCheck();
-        square = EditorGUILayout.Toggle("Square Size?", square);
-        if (square)
+        if (cso != null)
         {
-            _sizeH = (SIZE)EditorGUILayout.EnumPopup("Size:", _sizeH);
-            _sizeV = _sizeH;
-        }
-        else
-        {
-            _sizeH = (SIZE)EditorGUILayout.EnumPopup("Horizontal Size:", _sizeH);
-            _sizeV = (SIZE)EditorGUILayout.EnumPopup("Vertical Size:", _sizeV);
-        }
-        cureveTexFM = (CureveTextureFormat)EditorGUILayout.EnumPopup("Texture Format:" , cureveTexFM);
-        ac = EditorGUILayout.CurveField(ac);
-        EditorGUILayout.BeginHorizontal();
-        {
-            AutoRefresh = GUILayout.Toggle(AutoRefresh, "AutoRefresh");
-
-            if (GUILayout.Button("Refresh") && !AutoRefresh)
+            if (cttEditor == null)
             {
-                RefreshCureveTex();
+                cttEditor = (CurveScriptObjectEditor)Editor.CreateEditor(cso, typeof(CurveScriptObjectEditor));
+                cttEditor.OnEnable();
             }
         }
-        if (EditorGUI.EndChangeCheck())
-        {
-            if (AutoRefresh)
-            {
-                RefreshCureveTex();
-            }
-        }
-
-        EditorGUILayout.EndHorizontal();
-
-        DrawPreview();
-        if (GUILayout.Button("Save"))
-        {
-            SaveCureveTex();
-        }
+        cttEditor.OnInspectorGUI();
     }
-    void DrawPreview()
+    public void AddItemsToMenu(GenericMenu menu)
     {
-        GUILayout.Label("preview:", EditorStyles.boldLabel);
-        if (cureveTex != null)
-        {
-            EditorGUILayout.BeginHorizontal("PreBackground");
-            GUILayout.FlexibleSpace();
-            Rect rect = GUILayoutUtility.GetRect(50, 150, 50, 150);
-            EditorGUI.DrawPreviewTexture(rect, cureveTex);
-            GUILayout.FlexibleSpace();
-            EditorGUILayout.EndHorizontal();
+        menu.AddItem(m_SaveSettings, false, MenuItemm_SaveSettings);
 
-        }
-
+        //NOTE: do not show the menu after adding items,
+        //      Unity will do that after adding the default
+        //      items: maximize, close tab, add tab >
     }
-    void SaveCureveTex()
+    private GUIContent m_SaveSettings = new GUIContent("Save Settings");
+    private void MenuItemm_SaveSettings()
     {
-        if (cureveTex != null)
+        string savePath = EditorUtility.SaveFilePanelInProject("Save Sattings", "CurveToTextureSettings", "asset", "Please enter a file name to save the Settings");
+        if (savePath != string.Empty)
         {
-            byte[] dataBytes = EncodeTexture(cureveTex, cureveTexFM);
-            //string savePath = Application.dataPath + "/SampleCircle.png";
+            cso = Instantiate(cso);
+            AssetDatabase.CreateAsset(cso,savePath);
+            AssetDatabase.SaveAssets();
 
-            string folderPath = PlayerPrefs.GetString("EPME_LastParticleCheckPath");
-            string savePath = EditorUtility.SaveFilePanelInProject("Save png", folderPath + "cureveTex", cureveTexFM.ToString(),"Please enter a file name to save the texture to");
+            EditorUtility.FocusProjectWindow();
 
-            if (savePath != "")
-            {
-                FileStream fileStream = File.Open(savePath, FileMode.OpenOrCreate);
-                fileStream.Write(dataBytes, 0, dataBytes.Length);
-                fileStream.Close();
-                UnityEditor.AssetDatabase.SaveAssets();
-                UnityEditor.AssetDatabase.Refresh();
-            }
+            Selection.activeObject = cso;
         }
     }
-    byte[] EncodeTexture(Texture2D t , CureveTextureFormat format)
-    {
-        switch (format)
-        {
-            case CureveTextureFormat.PNG:
-                return t.EncodeToPNG();
-            case CureveTextureFormat.JPG:
-                return t.EncodeToJPG();
-            case CureveTextureFormat.EXR:
-                return t.EncodeToEXR(Texture2D.EXRFlags.CompressZIP);
-            case CureveTextureFormat.TGA:
-                return t.EncodeToTGA();
-            default:
-                return null;
-        }
 
-    }
-
-    void RefreshCureveTex()
-    {
-        int h = (int)_sizeH;
-        int v = (int)_sizeV;
-        cureveTex = new Texture2D(h, v,TextureFormat.RGBAFloat, false);
-
-        for (int x = 0; x < h; x++)
-        {
-            for (int y = 0; y < v; y++)
-            {
-                float curveValue = ac.Evaluate((float)x / (float)h);
-                cureveTex.SetPixel(x, y, new Color(curveValue, curveValue, curveValue, curveValue));
-            }
-        }
-        cureveTex.Apply();
-    }
 }
