@@ -11,6 +11,7 @@ public class CurveToTexture : EditorWindow
     {
         // Get existing open window or if none, make a new one:
         CurveToTexture window = (CurveToTexture)EditorWindow.GetWindow(typeof(CurveToTexture));
+        window.RefreshCureveTex();
         window.Show();
     }
     public bool square = true;
