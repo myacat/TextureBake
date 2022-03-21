@@ -25,6 +25,15 @@ public class CurveToTexture : EditorWindow
         x512 = 512,
     }
 
+    public enum CureveTextureFormat
+    {
+        PNG,
+        TGA,
+        JPG,
+        EXR
+    }
+    CureveTextureFormat cureveTexFM = CureveTextureFormat.PNG;
+
     AnimationCurve ac = AnimationCurve.Linear(0, 0, 1, 1);
 
     Texture2D cureveTex;
@@ -46,6 +55,7 @@ public class CurveToTexture : EditorWindow
             _sizeH = (SIZE)EditorGUILayout.EnumPopup("Horizontal Size:", _sizeH);
             _sizeV = (SIZE)EditorGUILayout.EnumPopup("Vertical Size:", _sizeV);
         }
+        cureveTexFM = (CureveTextureFormat)EditorGUILayout.EnumPopup("Texture Format:" , cureveTexFM);
         ac = EditorGUILayout.CurveField(ac);
         EditorGUILayout.BeginHorizontal();
         {
@@ -83,7 +93,7 @@ public class CurveToTexture : EditorWindow
             EditorGUI.DrawPreviewTexture(rect, cureveTex);
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
-            //EditorGUILayout.ObjectField(cureveTex, typeof(Texture2D), false, GUILayout.Width(70), GUILayout.Height(70));
+
         }
 
     }
@@ -91,12 +101,11 @@ public class CurveToTexture : EditorWindow
     {
         if (cureveTex != null)
         {
-            byte[] dataBytes = cureveTex.EncodeToPNG();
+            byte[] dataBytes = EncodeTexture(cureveTex, cureveTexFM);
             //string savePath = Application.dataPath + "/SampleCircle.png";
 
             string folderPath = PlayerPrefs.GetString("EPME_LastParticleCheckPath");
-            string savePath = EditorUtility.SaveFilePanelInProject("Save png", folderPath + "cureveTex", "png",
-        "Please enter a file name to save the texture to");
+            string savePath = EditorUtility.SaveFilePanelInProject("Save png", folderPath + "cureveTex", cureveTexFM.ToString(),"Please enter a file name to save the texture to");
 
             if (savePath != "")
             {
@@ -108,18 +117,36 @@ public class CurveToTexture : EditorWindow
             }
         }
     }
+    byte[] EncodeTexture(Texture2D t , CureveTextureFormat format)
+    {
+        switch (format)
+        {
+            case CureveTextureFormat.PNG:
+                return t.EncodeToPNG();
+            case CureveTextureFormat.JPG:
+                return t.EncodeToJPG();
+            case CureveTextureFormat.EXR:
+                return t.EncodeToEXR(Texture2D.EXRFlags.CompressZIP);
+            case CureveTextureFormat.TGA:
+                return t.EncodeToTGA();
+            default:
+                return null;
+        }
+
+    }
+
     void RefreshCureveTex()
     {
         int h = (int)_sizeH;
         int v = (int)_sizeV;
-        cureveTex = new Texture2D(h, v);
+        cureveTex = new Texture2D(h, v,TextureFormat.RGBAFloat, false);
 
         for (int x = 0; x < h; x++)
         {
             for (int y = 0; y < v; y++)
             {
                 float curveValue = ac.Evaluate((float)x / (float)h);
-                cureveTex.SetPixel(x, y, new Color(curveValue, curveValue, curveValue));
+                cureveTex.SetPixel(x, y, new Color(curveValue, curveValue, curveValue, curveValue));
             }
         }
         cureveTex.Apply();
