@@ -9,9 +9,18 @@ public class CurveScriptObject : ScriptableObject
     public SIZE _sizeH = SIZE.x128;
     public SIZE _sizeV = SIZE.x128;
     public CureveTextureFormat cureveTexFM = CureveTextureFormat.PNG;
+    public MappingType mappingType = MappingType.Linear_Horizontal;
     public AnimationCurve ac = AnimationCurve.Linear(0, 0, 1, 1);
     public Gradient gd = new Gradient();
     public bool AutoRefresh = false;
+}
+
+public enum MappingType
+{
+    Linear_Horizontal,
+    Linear_Vertical,
+    Radial,
+    Box
 }
 
 public enum SIZE

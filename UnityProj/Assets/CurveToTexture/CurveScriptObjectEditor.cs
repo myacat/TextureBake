@@ -36,6 +36,7 @@ public class CurveScriptObjectEditor : Editor
                 cso._sizeV = (SIZE)EditorGUILayout.EnumPopup("Vertical Size:", cso._sizeV);
             }
             cso.cureveTexFM = (CureveTextureFormat)EditorGUILayout.EnumPopup("Texture Format:", cso.cureveTexFM);
+            cso.mappingType = (MappingType)EditorGUILayout.EnumPopup("Mapping Type:", cso.mappingType);
 
             EditorGUILayout.Space();
 
@@ -186,14 +187,31 @@ public class CurveScriptObjectEditor : Editor
         {
             for (int y = 0; y < v; y++)
             {
+                float samplingKey = 0;
+                switch (cso.mappingType)
+                {
+                    case MappingType.Linear_Horizontal:
+                        samplingKey = (float)x / h;
+                        break;
+                    case MappingType.Linear_Vertical:
+                        samplingKey = (float)y / v;
+                        break;
+                    case MappingType.Radial:
+                        samplingKey = 2 * Vector2.Distance(new Vector2((float)x / h, (float)y / v),new Vector2(0.5f,0.5f));
+                        break;
+                    case MappingType.Box:
+                        samplingKey = Mathf.Max(Mathf.Abs(2f * (float)x / h - 1), Mathf.Abs(2f * (float)y / v - 1));
+                        break;
+                }
+
                 switch (cso.type)
                 {
                     case DataType.Curve:
-                        float curveValue = cso.ac.Evaluate((float)x / (float)h);
+                        float curveValue = cso.ac.Evaluate(samplingKey);
                         cureveTex.SetPixel(x, y, new Color(curveValue, curveValue, curveValue, curveValue));
                         break;
                     case DataType.Gradient:
-                        Color colorValue = cso.gd.Evaluate((float)x / (float)h);
+                        Color colorValue = cso.gd.Evaluate(samplingKey);
                         cureveTex.SetPixel(x, y, colorValue);
                         break;
                 }
