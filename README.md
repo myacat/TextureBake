@@ -8,10 +8,10 @@ Unity版本：2018.4.16c1
 1、添加了四种不同的映射方式
 
 <div align=left>
-<img src = "Docs\Images\MappingType1.png" width = "220">
-<img src = "Docs\Images\MappingType2.png" width = "220">
-<img src = "Docs\Images\MappingType3.png" width = "220">
-<img src = "Docs\Images\MappingType4.png" width = "220">
+<img src = "Docs\Images\MappingType1.png" width = "200">
+<img src = "Docs\Images\MappingType2.png" width = "200">
+<img src = "Docs\Images\MappingType3.png" width = "200">
+<img src = "Docs\Images\MappingType4.png" width = "200">
 </div>
 --- 
 
