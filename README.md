@@ -7,12 +7,12 @@ Unity版本：2018.4.16c1
 ### 2022-04-12 更新
 1、添加了四种不同的映射方式
 
-<figure class = "fourth">
-    <img src = "Docs\Images\MappingType1.png" width = "250">
-    <img src = "Docs\Images\MappingType2.png" width = "250">
-    <img src = "Docs\Images\MappingType3.png" width = "250">
-    <img src = "Docs\Images\MappingType4.png" width = "250">
-</figure>
+
+<img src = "Docs\Images\MappingType1.png" width = "250">
+<img src = "Docs\Images\MappingType2.png" width = "250">
+<img src = "Docs\Images\MappingType3.png" width = "250">
+<img src = "Docs\Images\MappingType4.png" width = "250">
+
 ![MappingType](Docs\Images\MappingType1.png)![MappingType](Docs\Images\MappingType2.png)![MappingType](Docs\Images\MappingType3.png)![MappingType](Docs\Images\MappingType4.png)
 
 --- 
