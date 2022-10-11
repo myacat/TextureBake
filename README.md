@@ -1,6 +1,22 @@
 # CurveToTexture
 
 Unity版本：2018.4.16c1
+--- 
+
+### 2022-10-11 更新
+1、添加了两组数据差值的模式
+<div align=left>
+<img src = "Docs/Images/Dual_data_1.png" width = "200">
+<img src = "Docs/Images/Dual_data_4.png" width = "200">
+<img src = "Docs/Images/Dual_data_2.png" width = "200">
+<img src = "Docs/Images/Dual_data_3.png" width = "200">
+</div>
+</br>
+</br>
+
+动图演示：
+
+![textureFormatSet](Docs/Images/dual_data.gif)
 
 --- 
 
@@ -8,11 +24,13 @@ Unity版本：2018.4.16c1
 1、添加了四种不同的映射方式
 
 <div align=left>
-<img src = "Docs\Images\MappingType1.png" width = "200">
-<img src = "Docs\Images\MappingType2.png" width = "200">
-<img src = "Docs\Images\MappingType3.png" width = "200">
-<img src = "Docs\Images\MappingType4.png" width = "200">
+<img src = "Docs/Images/MappingType1.png" width = "200">
+<img src = "Docs/Images/MappingType2.png" width = "200">
+<img src = "Docs/Images/MappingType3.png" width = "200">
+<img src = "Docs/Images/MappingType4.png" width = "200">
 </div>
+
+
 --- 
 
 ### 2022-03-22 更新

@@ -12,6 +12,8 @@ public class CurveScriptObjectEditor : Editor
 
     Texture2D cureveTex;
 
+    
+
     public void OnEnable()
     {
         cso = (CurveScriptObject)target;
@@ -39,25 +41,45 @@ public class CurveScriptObjectEditor : Editor
             cso.mappingType = (MappingType)EditorGUILayout.EnumPopup("Mapping Type:", cso.mappingType);
 
             EditorGUILayout.Space();
-
+           
             cso.type = (DataType)EditorGUILayout.EnumPopup("Data Type", cso.type);
             switch (cso.type)
             {
                 case DataType.Curve:
-                    cso.ac = EditorGUILayout.CurveField(cso.ac, Color.red, new Rect(0, 0, 1, 1));
+                    cso.ac = EditorGUILayout.CurveField("Curve_1:", cso.ac, Color.red, new Rect(0, 0, 1, 1));
                     break;
                 case DataType.Gradient:
-                    cso.gd = EditorGUILayout.GradientField(cso.gd);
+                    cso.gd = EditorGUILayout.GradientField("Gradient_1", cso.gd);
                     break;
             }
-        }
-        if (EditorGUI.EndChangeCheck())
-        {
-            if (cso.AutoRefresh)
+
+            if (cso.mappingType == MappingType.dual_data)
             {
-                RefreshCureveTex();
+                switch (cso.type)
+                {
+                    case DataType.Curve:
+                        cso.ac_dual = EditorGUILayout.CurveField("Curve_2:",cso.ac_dual, Color.red, new Rect(0, 0, 1, 1));
+                        if (cso.ac_dual.keys.Length != cso.ac.keys.Length)
+                        {
+                            EditorGUILayout.HelpBox("key 数量不一致，可能会导致预期外的效果！", MessageType.Warning);
+                        }
+                        break;
+                    case DataType.Gradient:
+                        cso.gd_dual = EditorGUILayout.GradientField("Gradient_2",cso.gd_dual);
+                        if (cso.gd_dual.colorKeys.Length != cso.gd.colorKeys.Length)
+                        {
+                            EditorGUILayout.HelpBox("colorKeys 数量不一致，可能会导致预期外的效果！", MessageType.Warning);
+                        }
+                        if (cso.gd_dual.alphaKeys.Length != cso.gd.alphaKeys.Length)
+                        {
+                            EditorGUILayout.HelpBox("alphaKeys 数量不一致，可能会导致预期外的效果！", MessageType.Warning);
+                        }
+                        break;
+                }
+
+                cso.data_dua_curve = EditorGUILayout.CurveField("Blend Curve:",cso.data_dua_curve, Color.red, new Rect(0, 0, 1, 1));
+
             }
-        }
 
         GUILayout.FlexibleSpace();
         
@@ -76,6 +98,14 @@ public class CurveScriptObjectEditor : Editor
             }
         }
         EditorGUILayout.EndHorizontal();
+        }
+        if (EditorGUI.EndChangeCheck())
+        {
+            if (cso.AutoRefresh)
+            {
+                RefreshCureveTex();
+            }
+        }
     }
     public void DrawCustomPreview(Rect r)
     {
@@ -182,7 +212,8 @@ public class CurveScriptObjectEditor : Editor
         int h = (int)cso._sizeH;
         int v = (int)cso._sizeV;
         cureveTex = new Texture2D(h, v, TextureFormat.RGBAFloat, false);
-
+        cureveTex.filterMode = FilterMode.Point;
+        cureveTex.wrapMode = TextureWrapMode.Clamp;
         for (int x = 0; x < h; x++)
         {
             for (int y = 0; y < v; y++)
@@ -202,16 +233,59 @@ public class CurveScriptObjectEditor : Editor
                     case MappingType.Box:
                         samplingKey = Mathf.Max(Mathf.Abs(2f * (float)x / h - 1), Mathf.Abs(2f * (float)y / v - 1));
                         break;
+                    case MappingType.Mirror_H:
+                        samplingKey = Mathf.Abs(2f * (float)x / h - 1);
+                        break;
+                    case MappingType.Mirror_V:
+                        samplingKey = Mathf.Abs(2f * (float)y / v - 1);
+                        break;
+                    case MappingType.dual_data:
+                        samplingKey = (float)x / h;
+                        break;
                 }
-
+                float lerpValue = cso.data_dua_curve.Evaluate((float)y / v);
                 switch (cso.type)
                 {
                     case DataType.Curve:
                         float curveValue = cso.ac.Evaluate(samplingKey);
+                        if (cso.mappingType == MappingType.dual_data)
+                        {
+                            AnimationCurve ad_temp = new AnimationCurve();
+                            Keyframe[] keyframes = new Keyframe[Mathf.Min(cso.ac_dual.keys.Length , cso.ac.keys.Length)];
+                            for(int keyCount = 0; keyCount< keyframes.Length; keyCount++)
+                            {
+                                keyframes[keyCount].weightedMode = cso.ac.keys[keyCount].weightedMode;
+                                keyframes[keyCount].time = Mathf.Lerp(cso.ac_dual.keys[keyCount].time, cso.ac.keys[keyCount].time, lerpValue);
+                                keyframes[keyCount].value = Mathf.Lerp(cso.ac_dual.keys[keyCount].value, cso.ac.keys[keyCount].value, lerpValue);
+                            }
+                            ad_temp.keys = keyframes;
+                            curveValue = ad_temp.Evaluate(samplingKey);
+                        }
                         cureveTex.SetPixel(x, y, new Color(curveValue, curveValue, curveValue, curveValue));
                         break;
                     case DataType.Gradient:
+
                         Color colorValue = cso.gd.Evaluate(samplingKey);
+                        if (cso.mappingType == MappingType.dual_data)
+                        {
+                            Gradient gd_temp = new Gradient();
+                            GradientColorKey[] ck = new GradientColorKey[Mathf.Min(cso.gd_dual.colorKeys.Length, cso.gd.colorKeys.Length)];
+                            for (int colorKeyCount = 0; colorKeyCount < Mathf.Min(cso.gd_dual.colorKeys.Length, cso.gd.colorKeys.Length); colorKeyCount++)
+                            {
+                                ck[colorKeyCount].time = Mathf.Lerp(cso.gd_dual.colorKeys[colorKeyCount].time, cso.gd.colorKeys[colorKeyCount].time, lerpValue);
+                                ck[colorKeyCount].color = Color.Lerp(cso.gd_dual.colorKeys[colorKeyCount].color, cso.gd.colorKeys[colorKeyCount].color, lerpValue);
+                            }
+                            GradientAlphaKey[] ak = new GradientAlphaKey[Mathf.Min(cso.gd_dual.alphaKeys.Length, cso.gd.alphaKeys.Length)];
+                            for (int alphaKeyCount = 0; alphaKeyCount< ak.Length; alphaKeyCount++)
+                            {
+
+                                ak[alphaKeyCount].time = Mathf.Lerp(cso.gd_dual.alphaKeys[alphaKeyCount].time, cso.gd.alphaKeys[alphaKeyCount].time, lerpValue);
+                                ak[alphaKeyCount].alpha = Mathf.Lerp(cso.gd_dual.alphaKeys[alphaKeyCount].alpha, cso.gd.alphaKeys[alphaKeyCount].alpha, lerpValue);
+                            }
+                            gd_temp.SetKeys(ck, ak);
+                            colorValue = gd_temp.Evaluate(samplingKey);
+                        } 
+
                         cureveTex.SetPixel(x, y, colorValue);
                         break;
                 }
@@ -249,6 +323,7 @@ public class CurveScriptObjectEditor : Editor
 
         if (m_PreviewMode == PreviewMode.A)
         {
+            
             EditorGUI.DrawTextureAlpha(r, cureveTex, ScaleMode.ScaleToFit);
         }
         else
